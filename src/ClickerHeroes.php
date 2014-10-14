@@ -1,4 +1,4 @@
-<?php
+<?php namespace KernelCurry\ClickerHeroes;
 
 /**
  * Clicker Heroes API - A game save api for php.
@@ -9,7 +9,7 @@
  * @author   Michael Curry <kernelcurry@gmail.com>
  */
 
-class ClickerHeroes {
+class Save {
 
 	/**
 	 * Known salts

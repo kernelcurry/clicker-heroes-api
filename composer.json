@@ -1,0 +1,21 @@
+{
+  "name": "kernelcurry/clicker-heroes-api",
+  "description": "Clicker Heroes API - decrypt, encrypt and manipulate saved games.",
+  "keywords": ["api", "clicker", "heroes", "game"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Michael Curry",
+      "email": "kernelcurry@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.4.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "KernelCurry\\ClickerHeroes\\": "src/"
+    }
+  },
+  "minimum-stability": "dev"
+}
