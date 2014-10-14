@@ -9,53 +9,30 @@
  * @author   Michael Curry <kernelcurry@gmail.com>
  */
 
-class Save {
+class Save
+{
+	/**
+	 * @var Helper
+	 */
+	private $helper;
 
 	/**
-	 * Known salts
-	 * @var array
+	 * @var Crypt
 	 */
-	private $salts = [
-		'af0ik392jrmt0nsfdghy0'
-	];
+	private $crypt;
 
 	/**
-	 * Salt that is found to work in with the imported save
-	 * @var mixed
+	 * @var mixed|\stdClass
 	 */
-	private $salt_used = null;
-
-	/**
-	 * Encrypted (imported) save.
-	 * @var mixed
-	 */
-	protected $save_encrypted = null;
-
-	/**
-	 * Decrypted (array) save.
-	 * @var mixed
-	 */
-	protected $save_decrypted = null;
-
-	/**
-	 * Anti-cheat delimiter that is placed between the game
-	 * data and the hack check.
-	 * @var mixed
-	 */
-	protected $delimiter = null;
-
-	/**
-	 * If this variable is not empty, something went wrong.
-	 * @var array
-	 */
-	protected $errors = [];
+	protected $save = null;
 
 	/**
 	 * Construct for the class.
 	 */
-	public function __construst()
+	public function __construct()
 	{
-		// Currently not in use
+		$this->helper = new Helper;
+		$this->crypt  = new Crypt;
 	}
 
 	/**
@@ -66,92 +43,43 @@ class Save {
 	 */
 	public function import($value)
 	{
-		$this->save_encrypted = $value;
-		$this->getDelimiter();
-		if ( ! $this->decrypt())
-		{
-			$this->errors[] = 'importSave() | decrypting game save encountered a problem.';
-		}
+		$this->save = $this->crypt->decrypt($value);
 
 		return $this;
 	}
 
 	/**
-	 * Take the game save you have manipulated and
-	 * export it into an encrypted save that can be used in the game.
+	 * Take the game save you have manipulated and export it
+	 * into an encrypted save that can be used in the game.
 	 *
 	 * @return string
 	 */
 	public function export()
 	{
-		$new = base64_encode(json_encode($this->save_decrypted));
-		$hash = md5($new . $this->salt_used);
-		$new_save = '';
-
-		for ($i = 0; $i < strlen($new); $i++)
-		{
-			$new_save .= $new[$i].$this->randomCharacter();
-		}
-		$new_save .= $this->delimiter;
-		$new_save .= $hash;
-
-		return $new_save;
+		return $this->crypt->encrypt($this->save);
 	}
 
-	protected function decrypt()
+	/**
+	 * Getter for the current state of the save.  This could
+	 * return  null or a stdClass.
+	 *
+	 * @return mixed|\stdClass
+	 */
+	public function getSave()
 	{
-		$result = explode($this->delimiter,$this->save_encrypted);
-
-		foreach ($this->salts as $salt)
-		{
-			$check = '';
-
-			for ($i = 0; $i < strlen($result[0]); $i += 2)
-			{
-				$check .= $result[0][$i];
-			}
-
-			$hash = md5($check . $salt);
-			if ( $hash == $result[1]) {
-				$this->salt_used = $salt;
-				$this->save_decrypted = json_decode(base64_decode($check));
-				return true;
-			}
-		}
-
-		// salts do not work
-		return false;
+		return $this->save;
 	}
 
-	public function getDecrypted()
+	/**
+	 * Setter for the current save.  This must be a stdClass in
+	 * the correct format for the game.  This function does not
+	 * measure the integrity of the set value, so be careful.
+	 *
+	 * @param mixed|\stdClass $value
+	 */
+	public function setSave($value)
 	{
-		return $this->save_decrypted;
-	}
-
-	protected function getDelimiter()
-	{
-		if (is_null($this->save_decrypted)) {
-			$this->delimiter = substr($this->save_encrypted, strlen($this->save_encrypted) - 48, 16);
-			return true;
-		}
-
-		return false;
-	}
-
-	public function resetCooldowns()
-	{
-		foreach ($this->save_decrypted->skillCooldowns as &$cooldown)
-		{
-			$cooldown = 0;
-		}
-
-		return $this;
-	}
-
-	protected function randomCharacter()
-	{
-		$characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-		return$characters[mt_rand(0,strlen($characters)-1)];
+		$this->save = $value;
 	}
 
 }
