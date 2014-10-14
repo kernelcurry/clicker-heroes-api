@@ -62,13 +62,13 @@ class Save {
 	 * This function uses a game save to populate required variables.
 	 *
 	 * @param string $value
-	 * @return ClickerHeroes $this
+	 * @return $this
 	 */
-	public function importSave($value)
+	public function import($value)
 	{
 		$this->save_encrypted = $value;
 		$this->getDelimiter();
-		if ( ! $this->decryptSave())
+		if ( ! $this->decrypt())
 		{
 			$this->errors[] = 'importSave() | decrypting game save encountered a problem.';
 		}
@@ -82,7 +82,7 @@ class Save {
 	 *
 	 * @return string
 	 */
-	public function exportSave()
+	public function export()
 	{
 		$new = base64_encode(json_encode($this->save_decrypted));
 		$hash = md5($new . $this->salt_used);
@@ -98,7 +98,7 @@ class Save {
 		return $new_save;
 	}
 
-	protected function decryptSave()
+	protected function decrypt()
 	{
 		$result = explode($this->delimiter,$this->save_encrypted);
 
@@ -121,6 +121,11 @@ class Save {
 
 		// salts do not work
 		return false;
+	}
+
+	public function getDecrypted()
+	{
+		return $this->save_decrypted;
 	}
 
 	protected function getDelimiter()
