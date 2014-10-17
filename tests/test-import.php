@@ -23,10 +23,7 @@
 			$client = new Save;
 			$client->import($this->save_new_encrypted);
 			$check = json_decode($this->save_new_json);
-			if ($check != $client->getSave())
-			{
-				throw new Exception('New Save Import Error');
-			}
+			$this->assertEquals($check, $client->getSave());
 		}
 
 	}
